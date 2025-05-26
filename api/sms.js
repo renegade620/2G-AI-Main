@@ -22,12 +22,12 @@ module.exports = async (req, res) => {
       }
     );
 
-    reply = aiRes.data.text.trim().slice(0, 160); // keep it SMS-friendly
+    reply = aiRes.data.text.trim().slice(0, 160); // SMS limit
   } catch (err) {
     reply = 'Sorry, I couldn’t get the answer right now.';
   }
 
-  // Response format for Africa’s Talking
+  // Required Africa's Talking format
   res.set('Content-Type', 'text/plain');
   res.send(reply);
 };
