@@ -4,6 +4,7 @@
     { "src": "api/ussd.js", "use": "@vercel/node" }
   ],
   "routes": [
+    { "src": "/api/ussd", "dest": "api/ussd.js" },
     { "src": "/api/ussd", "dest": "api/ussd.js" }
   ]
 }
