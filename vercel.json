@@ -1,11 +1,14 @@
 {
   "version": 2,
+  "public": "public",
   "builds": [
     { "src": "api/ussd.js", "use": "@vercel/node" },
     { "src": "api/sms.js", "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/api/ussd", "dest": "api/ussd.js" },
-    { "src": "/api/sms", "dest": "api/sms.js" }
+    { "src": "/api/sms", "dest": "api/sms.js" },
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
