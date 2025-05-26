@@ -1,14 +1,11 @@
-const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
-require('dotenv').config();
+const express = require('express');
 
 const app = express();
-
-app.use(express.static('public')); // Serves index.html by default
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.post('/chat', async (req, res) => {
+app.post('/api/server', async (req, res) => {
   const userMessage = req.body.message;
 
   try {
@@ -29,14 +26,13 @@ app.post('/chat', async (req, res) => {
 
     const aiReply = aiRes.data.text?.trim() || 'No response from AI.';
 
-    // Return inline response (no need to reload static index.html)
     res.send(`
       <!DOCTYPE html>
       <html><head><meta charset="UTF-8"><title>AI Chat</title>
       <style>body{font-family:sans-serif;margin:20px;max-width:500px}textarea,button{width:100%;padding:10px;font-size:1em}</style>
       </head><body>
       <h2>Chat with AI</h2>
-      <form method="POST" action="/chat">
+      <form method="POST" action="/api/server">
         <textarea name="message" rows="5" required>${userMessage}</textarea>
         <button type="submit">Send</button>
       </form>
@@ -49,5 +45,4 @@ app.post('/chat', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+module.exports = app;
