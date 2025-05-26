@@ -1,18 +1,13 @@
 const express = require('express');
 const axios = require('axios');
-const path = require('path');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const app = express();
+
+app.use(express.static('public')); // Serves index.html by default
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// Serve index.html on GET
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Handle AI chat on POST
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
 
@@ -34,7 +29,7 @@ app.post('/chat', async (req, res) => {
 
     const aiReply = aiRes.data.text?.trim() || 'No response from AI.';
 
-    // Respond with inline HTML for ultra-lightweight load
+    // Return inline response (no need to reload static index.html)
     res.send(`
       <!DOCTYPE html>
       <html><head><meta charset="UTF-8"><title>AI Chat</title>
@@ -48,9 +43,9 @@ app.post('/chat', async (req, res) => {
       <div style="margin-top:15px;white-space:pre-wrap;"><strong>AI:</strong> ${aiReply}</div>
       </body></html>
     `);
-  } catch (error) {
-    console.error('AI Error:', error.message);
-    res.send('Something went wrong. Please try again.');
+  } catch (err) {
+    console.error('AI Error:', err.message);
+    res.send('Something went wrong.');
   }
 });
 
