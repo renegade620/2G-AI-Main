@@ -3,24 +3,35 @@ const africastalking = require('africastalking')({
   apiKey: process.env.AFRICASTALKING_API_KEY,
   username: process.env.AFRICASTALKING_USERNAME
 });
+
 const sms = africastalking.SMS;
 
 module.exports = async (req, res) => {
-  if (req.method !== 'POST') return res.status(405).send('Only POST allowed');
+  if (req.method !== 'POST') {
+    return res.status(405).send('Method Not Allowed');
+  }
 
   let body = '';
-  req.on('data', chunk => { body += chunk.toString(); });
-  req.on('end', async () => {
-    const params = new URLSearchParams(body);
-    const message = params.get('text') || '';
-    const from = params.get('from');
 
+  req.on('data', chunk => {
+    body += chunk.toString();
+  });
+
+  req.on('end', async () => {
     try {
-      const aiRes = await axios.post(
+      const params = new URLSearchParams(body);
+      const userMessage = params.get('text') || '';
+      const senderNumber = params.get('from');
+
+      if (!senderNumber || !userMessage) {
+        return res.status(400).send('Bad Request: Missing required fields.');
+      }
+
+      const aiResponse = await axios.post(
         'https://api.cohere.ai/v1/chat',
         {
           model: 'command-r-plus',
-          message: `Reply to this message in helpful and respectful tone: "${message}"`,
+          message: `Respond to the following SMS message in a respectful, clear, and helpful tone: "${userMessage}"`,
           temperature: 0.7
         },
         {
@@ -31,17 +42,21 @@ module.exports = async (req, res) => {
         }
       );
 
-      const aiReply = aiRes.data.text.trim();
+      const aiReply = aiResponse.data.text?.trim();
+
+      if (!aiReply) {
+        throw new Error('AI response is empty.');
+      }
 
       await sms.send({
-        to: [from],
+        to: [senderNumber],
         message: aiReply
       });
 
-      res.status(200).send('OK');
-    } catch (err) {
-      console.error('SMS AI error:', err.message);
-      res.status(500).send('Server error');
+      return res.status(200).send('Response sent successfully.');
+    } catch (error) {
+      console.error('Error processing SMS request:', error);
+      return res.status(500).send('Internal Server Error');
     }
   });
 };
