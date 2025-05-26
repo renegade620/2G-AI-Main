@@ -1,8 +1,4 @@
-const OpenAI = require("openai");
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const axios = require("axios");
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).send("Only POST allowed");
@@ -22,18 +18,27 @@ module.exports = async (req, res) => {
 Ask a question on farming, health or business.`;
     } else {
       try {
-        const completion = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: userInput }],
-          max_tokens: 60,
-          temperature: 0.7,
-        });
+        const aiRes = await axios.post(
+          "https://api.cohere.ai/v1/generate",
+          {
+            model: "command-light",
+            prompt: userInput,
+            max_tokens: 60,
+            temperature: 0.7
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
+              "Content-Type": "application/json",
+            }
+          }
+        );
 
-        const aiReply = completion.choices[0].message.content.trim();
+        const aiReply = aiRes.data.generations[0].text.trim();
         response = `END ${aiReply}`;
       } catch (err) {
-        console.error("OpenAI API error:", err);
-        response = "END AI failed. Try again later.";
+        console.error("Cohere error:", err.message);
+        response = "END AI unavailable. Try again later.";
       }
     }
 
