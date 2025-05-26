@@ -35,6 +35,7 @@ Ask a question on farming, health or business.`;
         const aiReply = aiRes.data.choices[0].message.content.trim();
         response = `END ${aiReply}`;
       } catch (err) {
+        console.error('OpenAI API error:', err.response?.data || err.message);
         response = 'END AI failed. Try again later.';
       }
     }
