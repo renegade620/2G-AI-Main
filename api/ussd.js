@@ -1,25 +1,44 @@
+require('dotenv').config();
+const axios = require('axios');
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).send('Only POST allowed');
 
   let body = '';
   req.on('data', chunk => { body += chunk.toString(); });
-  req.on('end', () => {
+  req.on('end', async () => {
     const params = new URLSearchParams(body);
     const text = params.get('text');
-
     let response = '';
 
-    if (text === '') {
+    if (!text || text === '') {
       response = `CON Welcome to 2G AI
-1. Crop Advice
-2. Weather Tips
-3. Exit`;
-    } else if (text === '1') {
-      response = 'END Use neem oil and rotate crops.';
-    } else if (text === '2') {
-      response = 'END Rains expected tomorrow. Time to sow.';
+Ask a question about farming, health, business...`;
     } else {
-      response = 'END Invalid input.';
+      const userInput = text.split('*').pop();
+
+      try {
+        const aiRes = await axios.post(
+          'https://api.openai.com/v1/chat/completions',
+          {
+            model: 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: userInput }],
+            max_tokens: 60,
+            temperature: 0.7
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        const aiReply = aiRes.data.choices[0].message.content.trim();
+        response = `END ${aiReply}`;
+      } catch (err) {
+        response = 'END AI failed. Try again later.';
+      }
     }
 
     res.setHeader('Content-Type', 'text/plain');
