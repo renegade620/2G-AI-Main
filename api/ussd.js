@@ -1,64 +1,73 @@
 const axios = require('axios');
 
 module.exports = async (req, res) => {
-  if (req.method !== 'POST') return res.status(405).send('Only POST allowed');
+  if (req.method !== 'POST') {
+    return res.status(405).send('Only POST allowed');
+  }
 
   let body = '';
-  req.on('data', chunk => { body += chunk.toString(); });
+  req.on('data', chunk => {
+    body += chunk.toString();
+  });
+
   req.on('end', async () => {
     const params = new URLSearchParams(body);
     const text = params.get('text') || '';
     const inputs = text.split('*');
     let response = '';
 
+    const interestMap = {
+      '1': 'Maths',
+      '2': 'Science',
+      '3': 'Languages',
+      '4': 'Technical work',
+      '5': 'Helping people'
+    };
+
+    const subjectMap = {
+      '1': 'Maths',
+      '2': 'Science',
+      '3': 'English',
+      '4': 'Kiswahili',
+      '5': 'Computer Studies'
+    };
+
+    // Step 1
     if (text === '') {
       response = `CON Welcome to Career Buddy!
 Find a career that suits you.
 1. Start`;
-    } else if (inputs.length === 1) {
-      response = `CON What do you enjoy?
+    }
+    // Step 2
+    else if (inputs.length === 1) {
+      response = `CON What do you enjoy most?
 1. Maths
 2. Science
 3. Languages
 4. Technical work
 5. Helping people`;
-    } else if (inputs.length === 2) {
-      response = `CON What are your best subjects?
+    }
+    // Step 3
+    else if (inputs.length === 2) {
+      response = `CON What subject are you best at?
 1. Maths
 2. Science
 3. English
 4. Kiswahili
 5. Computer`;
-    } else if (inputs.length === 3) {
-      const interest = inputs[1];
-      const subject = inputs[2];
-
-      const interestMap = {
-        '1': 'Maths',
-        '2': 'Science',
-        '3': 'Languages',
-        '4': 'Technical work',
-        '5': 'Helping people'
-      };
-
-      const subjectMap = {
-        '1': 'Maths',
-        '2': 'Science',
-        '3': 'English',
-        '4': 'Kiswahili',
-        '5': 'Computer Studies'
-      };
-
-      const interestText = interestMap[interest] || 'General';
-      const subjectText = subjectMap[subject] || 'General';
+    }
+    // Step 4 - AI Suggestion
+    else if (inputs.length === 3) {
+      const interest = interestMap[inputs[1]] || 'General topics';
+      const subject = subjectMap[inputs[2]] || 'General subjects';
 
       try {
         const aiRes = await axios.post(
           'https://api.cohere.ai/v1/chat',
           {
             model: 'command-r-plus',
-            message: `Give only 2 short career suggestions (max 20 words total) for a Kenyan student who enjoys ${interestText} and is good at ${subjectText}.`,
-            chat_history: []
+            message: `Suggest 2 good careers for a student in Kenya who enjoys ${interest} and is good at ${subject}. Keep it brief and practical.`,
+            temperature: 0.7
           },
           {
             headers: {
@@ -68,18 +77,16 @@ Find a career that suits you.
           }
         );
 
-        let aiReply = aiRes.data.text.trim();
-        // Limit to 160 chars just to be safe
-        if (aiReply.length > 160) {
-          aiReply = aiReply.slice(0, 157) + '...';
-        }
-
+        const aiReply = aiRes.data.text.trim();
         response = `END ${aiReply}`;
       } catch (err) {
-        response = 'END AI failed. Try again later.';
+        console.error(err.message);
+        response = 'END Sorry, AI failed. Try again later.';
       }
-    } else {
-      response = 'END Thanks for using Career Buddy.';
+    }
+    // Anything past 3 steps
+    else {
+      response = 'END Thank you for using Career Buddy.';
     }
 
     res.setHeader('Content-Type', 'text/plain');
