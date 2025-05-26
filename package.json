@@ -1,0 +1,24 @@
+{
+  "name": "2g-ussd-ai",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "vercel dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raphachegeke/2G-AI-Main.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/raphachegeke/2G-AI-Main/issues"
+  },
+  "homepage": "https://github.com/raphachegeke/2G-AI-Main#readme",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.9.0"
+  }
+}
