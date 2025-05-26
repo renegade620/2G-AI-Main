@@ -3,7 +3,8 @@
   "builds": [
     { "src": "api/ussd.js", "use": "@vercel/node" },
     { "src": "api/sms.js", "use": "@vercel/node" },
-    { "src": "static/index.html", "use": "@vercel/static" }
+    { "src": "static/index.html", "use": "@vercel/static" },
+    { "src": "api/server.js", "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/api/ussd", "dest": "api/ussd.js" },
