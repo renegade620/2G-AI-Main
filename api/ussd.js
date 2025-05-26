@@ -1,4 +1,3 @@
-require('dotenv').config();
 const axios = require('axios');
 
 module.exports = async (req, res) => {
@@ -8,15 +7,14 @@ module.exports = async (req, res) => {
   req.on('data', chunk => { body += chunk.toString(); });
   req.on('end', async () => {
     const params = new URLSearchParams(body);
-    const text = params.get('text');
+    const text = params.get('text') || '';
+    const userInput = text.split('*').pop();
     let response = '';
 
-    if (!text || text === '') {
+    if (!text) {
       response = `CON Welcome to 2G AI
-Ask a question about farming, health, business...`;
+Ask a question on farming, health or business.`;
     } else {
-      const userInput = text.split('*').pop();
-
       try {
         const aiRes = await axios.post(
           'https://api.openai.com/v1/chat/completions',
