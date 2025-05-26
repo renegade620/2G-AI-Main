@@ -1,17 +1,17 @@
 const axios = require('axios');
-require('dotenv').config();
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
     return res.status(405).send('Method Not Allowed');
   }
 
-  const chunks = [];
+  let body = '';
   for await (const chunk of req) {
-    chunks.push(chunk);
+    body += chunk.toString();
   }
 
-  const body = Buffer.concat(chunks).toString();
+  // parse URL-encoded form body
   const params = new URLSearchParams(body);
   const userMessage = params.get('message') || '';
 
