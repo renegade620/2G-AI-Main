@@ -57,7 +57,7 @@ Find a career that suits you.
           'https://api.cohere.ai/v1/chat',
           {
             model: 'command-r-plus',
-            message: `Suggest 2 suitable careers for a student who enjoys ${interestText} and is good at ${subjectText}. Keep it short and local to Kenya.`,
+            message: `Give only 2 short career suggestions (max 20 words total) for a Kenyan student who enjoys ${interestText} and is good at ${subjectText}.`,
             chat_history: []
           },
           {
@@ -68,13 +68,18 @@ Find a career that suits you.
           }
         );
 
-        const aiReply = aiRes.data.text.trim();
+        let aiReply = aiRes.data.text.trim();
+        // Limit to 160 chars just to be safe
+        if (aiReply.length > 160) {
+          aiReply = aiReply.slice(0, 157) + '...';
+        }
+
         response = `END ${aiReply}`;
       } catch (err) {
         response = 'END AI failed. Try again later.';
       }
     } else {
-      response = 'END Thank you for using Career Buddy.';
+      response = 'END Thanks for using Career Buddy.';
     }
 
     res.setHeader('Content-Type', 'text/plain');
