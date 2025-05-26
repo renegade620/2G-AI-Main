@@ -1,12 +1,19 @@
 const axios = require('axios');
-const bodyParser = require('body-parser');
-const express = require('express');
+require('dotenv').config();
 
-const app = express();
-app.use(bodyParser.urlencoded({ extended: false }));
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(405).send('Method Not Allowed');
+  }
 
-app.post('/api/server', async (req, res) => {
-  const userMessage = req.body.message;
+  const chunks = [];
+  for await (const chunk of req) {
+    chunks.push(chunk);
+  }
+
+  const body = Buffer.concat(chunks).toString();
+  const params = new URLSearchParams(body);
+  const userMessage = params.get('message') || '';
 
   try {
     const aiRes = await axios.post(
@@ -26,7 +33,8 @@ app.post('/api/server', async (req, res) => {
 
     const aiReply = aiRes.data.text?.trim() || 'No response from AI.';
 
-    res.send(`
+    res.setHeader('Content-Type', 'text/html');
+    res.status(200).send(`
       <!DOCTYPE html>
       <html><head><meta charset="UTF-8"><title>AI Chat</title>
       <style>body{font-family:sans-serif;margin:20px;max-width:500px}textarea,button{width:100%;padding:10px;font-size:1em}</style>
@@ -41,8 +49,6 @@ app.post('/api/server', async (req, res) => {
     `);
   } catch (err) {
     console.error('AI Error:', err.message);
-    res.send('Something went wrong.');
+    res.status(500).send('Something went wrong.');
   }
-});
-
-module.exports = app;
+};
