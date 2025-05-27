@@ -111,20 +111,19 @@ module.exports = async (req, res) => {
             margin-top: 15px;
             white-space: pre-wrap;
             font-size: 0.95em;
-            background: rgba(0,0,0,0.03);
-            padding: 10px;
-            border-radius: 6px;
           }
         </style>
       </head>
       <body>
         <div class="container">
           <h2 style="text-align:center;">Chat with AI</h2>
-          <form method="POST" action="/api/server">
-            <textarea name="message" required>${userMessage}</textarea>
+          <form id="chat-form">
+            <textarea id="message" name="message" required placeholder="Type your message...">${userMessage}</textarea>
             <button type="submit">Send</button>
           </form>
-          <div class="response"><strong>AI:</strong> ${aiReply}</div>
+          <div id="chat-history" class="response">
+            <strong>AI:</strong> ${aiReply}
+          </div>
           <div class="toggle">
             <label>
               <input type="checkbox" onchange="document.body.classList.toggle('dark')">
@@ -132,6 +131,45 @@ module.exports = async (req, res) => {
             </label>
           </div>
         </div>
+
+        <script>
+          const form = document.getElementById('chat-form');
+          const historyDiv = document.getElementById('chat-history');
+
+          // Load history
+          const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+          if (${JSON.stringify(userMessage)}.trim()) {
+            chatHistory.push({
+              message: ${JSON.stringify(userMessage)},
+              reply: ${JSON.stringify(aiReply)}
+            });
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+          }
+          renderHistory(chatHistory);
+
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = form.message.value.trim();
+            if (!message) return;
+
+            const res = await fetch('/api/server', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams({ message })
+            });
+
+            const html = await res.text();
+            document.open();
+            document.write(html);
+            document.close();
+          });
+
+          function renderHistory(data) {
+            historyDiv.innerHTML = data.map(item => \`
+              <div><b>You:</b> \${item.message}<br><b>AI:</b> \${item.reply}</div>
+            \`).join('<hr>');
+          }
+        </script>
       </body>
       </html>
     `);
