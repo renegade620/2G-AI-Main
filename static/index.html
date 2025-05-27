@@ -1,122 +1,178 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>AI Chat (Lite)</title>
-  <style>
-    :root {
-      --bg-color: #f4f4f4;
-      --text-color: #222;
-      --box-bg: #fff;
-      --border-color: #ccc;
-      --btn-bg: #007bff;
-      --btn-hover: #0056b3;
-    }
-
-    body.dark {
-      --bg-color: #121212;
-      --text-color: #eee;
-      --box-bg: #1e1e1e;
-      --border-color: #333;
-      --btn-bg: #0d6efd;
-      --btn-hover: #0a58ca;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .container {
-      background: var(--box-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 20px;
-      max-width: 400px;
-      width: 100%;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 1.4em;
-    }
-
-    textarea {
-      width: 100%;
-      padding: 10px;
-      font-size: 1em;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      resize: vertical;
-      min-height: 100px;
-      box-sizing: border-box;
-      background: transparent;
-      color: inherit;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      font-size: 1em;
-      margin-top: 10px;
-      background-color: var(--btn-bg);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: var(--btn-hover);
-    }
-
-    .toggle {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 0.9em;
-    }
-
-    .toggle input {
-      display: none;
-    }
-
-    .toggle label {
-      cursor: pointer;
-      padding: 5px 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      display: inline-block;
-      background: var(--box-bg);
-    }
-
-    .toggle input:checked ~ body {
-      background: #121212;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Chat (Lite)</title>
+<style>
+  :root {
+    --bg: #f4f4f4;
+    --text: #222;
+    --box: #fff;
+    --border: #ccc;
+    --btn: #007bff;
+    --btn-hover: #0056b3;
+  }
+  body.dark {
+    --bg: #121212;
+    --text: #eee;
+    --box: #1e1e1e;
+    --border: #333;
+    --btn: #0d6efd;
+    --btn-hover: #0a58ca;
+  }
+  body {
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+  .container {
+    background: var(--box);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    resize: vertical;
+    min-height: 100px;
+    box-sizing: border-box;
+    background: transparent;
+    color: inherit;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    font-size: 1em;
+    margin-top: 10px;
+    background: var(--btn);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button:hover {
+    background: var(--btn-hover);
+  }
+  .toggle {
+    text-align: center;
+    margin-top: 15px;
+  }
+  .response {
+    margin-top: 15px;
+    white-space: pre-wrap;
+    font-size: 0.95em;
+  }
+  hr {
+    margin: 10px 0;
+    border: none;
+    border-top: 1px solid var(--border);
+  }
+</style>
 </head>
 <body>
   <div class="container">
-    <h2>Chat with AI</h2>
-    <form method="POST" action="/api/server">
-      <textarea name="message" placeholder="Type your message..." required></textarea>
+    <h2 style="text-align:center;">Chat with AI</h2>
+    <form id="chat-form">
+      <textarea id="message" name="message" required placeholder="Type your message..."></textarea>
       <button type="submit">Send</button>
     </form>
+    <div id="chat-history" class="response"></div>
     <div class="toggle">
       <label>
-        <input type="checkbox" onchange="document.body.classList.toggle('dark')">
+        <input type="checkbox" id="theme-toggle" />
         Toggle Dark Mode
       </label>
     </div>
   </div>
+
+  <script>
+    const form = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message');
+    const historyDiv = document.getElementById('chat-history');
+    const themeToggle = document.getElementById('theme-toggle');
+
+    // Load theme from localStorage
+    if(localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark');
+      themeToggle.checked = true;
+    }
+
+    themeToggle.addEventListener('change', () => {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    // Load chat history from localStorage
+    let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+    renderHistory(chatHistory);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = messageInput.value.trim();
+      if (!message) return;
+
+      // Show user message immediately
+      chatHistory.push({ message, reply: '...' });
+      renderHistory(chatHistory);
+
+      try {
+        const res = await fetch('/api/server', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ message })
+        });
+
+        if (!res.ok) throw new Error('Network error');
+        const data = await res.json();
+
+        // Replace last reply placeholder with real AI reply
+        chatHistory[chatHistory.length - 1].reply = data.reply || 'No reply';
+        localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+        renderHistory(chatHistory);
+        messageInput.value = '';
+      } catch (err) {
+        chatHistory[chatHistory.length - 1].reply = '[Error getting AI reply]';
+        renderHistory(chatHistory);
+        console.error(err);
+      }
+    });
+
+    function renderHistory(history) {
+      if (history.length === 0) {
+        historyDiv.innerHTML = '<i>No chat history yet.</i>';
+        return;
+      }
+      historyDiv.innerHTML = history.map(item => `
+        <div><b>You:</b> ${escapeHtml(item.message)}<br><b>AI:</b> ${escapeHtml(item.reply)}</div>
+        <hr>
+      `).join('');
+    }
+
+    // Simple HTML escape for safety
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, c => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[c]);
+    }
+  </script>
 </body>
 </html>
