@@ -9,6 +9,7 @@
   "routes": [
     { "src": "/api/ussd", "dest": "api/ussd.js" },
     { "src": "/api/sms", "dest": "api/sms.js" },
+    { "src": "/api/server", "dest": "api/server.js" },
     { "src": "/", "dest": "static/index.html" },
     { "src": "/(.*)", "dest": "static/index.html" }
   ]
