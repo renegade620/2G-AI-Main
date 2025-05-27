@@ -101,7 +101,11 @@
         <input type="checkbox" id="theme-toggle" /> Dark Mode
       </label>
     </div>
+
     <div id="chat-history"></div>
+     <div style="text-align: center; margin: 10px;">
+     <button id="clear-history" style="padding: 5px 10px;">Clear History</button>
+    </div>
 
     <form id="chat-form">
       <textarea id="message" rows="2" placeholder="Made by Rapha..." required></textarea>
@@ -166,6 +170,13 @@
         { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
       ));
     }
+
+document.getElementById('clear-history').onclick = () => {
+  localStorage.removeItem('chatHistory');
+  chatHistory = [];
+  renderHistory(chatHistory);
+};
+
   </script>
   <script>
   if ('serviceWorker' in navigator) {
