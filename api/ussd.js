@@ -4,6 +4,7 @@ const africastalking = require('africastalking')({
   username: process.env.AFRICASTALKING_USERNAME
 });
 const sms = africastalking.SMS;
+const apiKey = process.env.GEMINI_API_KEY
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).send('Only POST allowed');
@@ -87,7 +88,7 @@ Keep it short, local, and motivating.
           `.trim();
 
           const aiRes = await axios.post(
-            'https://api.cohere.ai/v1/chat',
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}',
             {
               model: 'command-r-plus',
               message: aiPrompt,
@@ -95,7 +96,7 @@ Keep it short, local, and motivating.
             },
             {
               headers: {
-                Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
+                Authorization: `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
               }
             }

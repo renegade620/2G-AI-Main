@@ -5,6 +5,7 @@ const africastalking = require('africastalking')({
 });
 
 const sms = africastalking.SMS;
+const apiKey = process.env.GEMINI_API_KEY
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -28,7 +29,7 @@ module.exports = async (req, res) => {
       }
 
       const aiResponse = await axios.post(
-        'https://api.cohere.ai/v1/chat',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}',
         {
           model: 'command-r-plus',
           message: `Respond to the following SMS message in a respectful, clear, and helpful tone: "${userMessage}"`,
@@ -36,7 +37,7 @@ module.exports = async (req, res) => {
         },
         {
           headers: {
-            Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
+            Authorization: `Bearer ${process.env.GEMINI_API_KEY}`,
             'Content-Type': 'application/json'
           }
         }
