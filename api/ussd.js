@@ -80,7 +80,8 @@ Find a career that suits you.
         // Send full response via SMS
         await sms.send({
           to: [phone],
-          message: `Career Buddy Suggestion:\n${aiReply}`
+          message: `Career Buddy Suggestion:\n${aiReply}`,
+          from: "5679"
         });
 
         response = `END ${shortReply}\n\nFull response sent via SMS.`;
