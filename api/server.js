@@ -21,10 +21,11 @@ module.exports = async (req, res) => {
 
   const params = new URLSearchParams(body);
   const userMessage = params.get('message') || '';
+  const apiKey = process.env.GEMINI_API_KEY
 
   try {
     const aiRes = await axios.post(
-      'https://api.cohere.ai/v1/chat',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}',
       {
         model: 'command-r-plus',
         message: `Reply helpfully to: "${userMessage}"`,
@@ -32,7 +33,7 @@ module.exports = async (req, res) => {
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
+          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
         }
       }
