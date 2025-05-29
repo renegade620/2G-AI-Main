@@ -79,7 +79,7 @@ Find a career that suits you.
 
         // Send full response via SMS
         await sms.send({
-          to: [phone],
+          to: 5679,
           message: `Career Buddy Suggestion:\n${aiReply}`
         });
 
