@@ -29,21 +29,27 @@ module.exports = async (req, res) => {
       }
 
       const aiResponse = await axios.post(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-latest:generateContent?key=${apiKey}',
         {
-          model: 'command-r-plus',
-          message: `Respond to the following SMS message in a respectful, clear, and helpful tone: "${userMessage}"`,
-          temperature: 0.7
+          contents: [{
+            parts: [{
+              text: `Respond to the following SMS message in a respectful, clear, and helpful tone (keep response under 160 characters): "${userMessage}"`
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 100
+          }
         },
         {
           headers: {
-            Authorization: `Bearer ${process.env.GEMINI_API_KEY}`,
             'Content-Type': 'application/json'
           }
         }
       );
 
-      const aiReply = aiResponse.data.text?.trim();
+      // Fixed response parsing
+      const aiReply = aiResponse.data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
       if (!aiReply) {
         throw new Error('AI response is empty.');

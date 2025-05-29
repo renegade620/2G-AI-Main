@@ -25,21 +25,26 @@ module.exports = async (req, res) => {
 
   try {
     const aiRes = await axios.post(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-latest:generateContent?key=${apiKey}',
       {
-        model: 'command-r-plus',
-        message: `Reply helpfully to: "${userMessage}"`,
-        temperature: 0.7
+        contents: [{
+          parts: [{
+            text: `Please provide a helpful and friendly response to: "${userMessage}"`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 500
+        }
       },
       {
         headers: {
-          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
         }
       }
     );
 
-    const aiReply = aiRes.data.text?.trim() || 'No response from AI.';
+    const aiReply = aiResponse.data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'No response from AI.';
 
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*'); // Allow CORS for frontend fetch
